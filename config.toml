@@ -1,0 +1,45 @@
+baseurl = "https://r4gus.github.io/"
+languageCode = "en-us"
+theme = "m10c"
+paginate = 5
+
+[params]
+  author = "David P. Sugar"
+  description = "hic Rhodus, hic salta"
+  avatar = "/me.jpg"
+  favicon = "/favicon.ico"
+
+[[params.social]]
+  icon = "github"
+  name = "My Github"
+  url = "https://github.com/r4gus"
+
+[languages]
+  [languages.en]
+    languageName = "English"
+    title = "r4gus"
+    subtitle = "bits and bytes"
+    owner = "David Pierre Sugar"
+    keywords = "blog, computer science, informatik, tech"
+    copyright = "David P. Sugar"
+    menuMore = "Show more"
+    readMore = "Read more"
+    readOtherPosts = "Read other posts"
+    newerPosts = "Newer posts"
+    olderPosts = "Older posts"
+    missingContentMessage = "Page not found..."
+    missingBackButtonLabel = "Back to home page"
+
+    [languages.en.params.logo]
+      logoText = "r4gus"
+      logoHomeLink = "/"
+
+    [languages.en.menu]
+      [[languages.en.menu.main]]
+        identifier = "about"
+        name = "About"
+        url = "/about"
+      [[languages.en.menu.main]]
+        identifier = "showcase"
+        name = "Showcase"
+        url = "/showcase"
