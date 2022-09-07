@@ -1,4 +1,4 @@
----
++++
 title = "SAM E51 Curiosity Nano programming with Zig #2 - UART"
 date: 2022-09-07T23:01:22+02:00
 author = "David P. Sugar"
@@ -9,7 +9,7 @@ description = "An introductory course on programming microcontroller based syste
 showFullContent = false
 readingTime = false
 hideComments = false
----
++++
 
 Last time we finished of by making the user LED of the Curiosity Nano board blink. In this post we're going to add (blocking) UART support to MicroZig, so we can interact with the board over a serial terminal.
 
