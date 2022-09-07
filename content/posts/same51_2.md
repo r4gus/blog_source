@@ -1,6 +1,6 @@
 +++
 title = "SAM E51 Curiosity Nano programming with Zig #2 - UART"
-date: 2022-09-07T23:01:22+02:00
+date = 2022-09-07T23:01:22+02:00
 author = "David P. Sugar"
 cover = ""
 tags = ["embedded", "atsame51j20a", "mcu", "uart", "usart", "serial"]
