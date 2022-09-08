@@ -11,9 +11,9 @@ readingTime = false
 hideComments = false
 +++
 
-Last time we finished of by making the user LED of the Curiosity Nano board blink. In this post we're going to add (blocking) UART support to MicroZig, so we can interact with the board over a serial terminal.
+Last time we made the user LED of the Curiosity Nano board blink. In this post we're going to add (blocking) UART support to MicroZig, so we can interact with the board over a serial terminal.
 
-MicroZig defines a UART interface in [`src/core/uart.zig`](https://github.com/ZigEmbeddedGroup/microzig/blob/main/src/core/uart.zig). To use it for our chip we must define a `uart` struct that specifies the supported `DataBits` (bits send between the start and stop bit), number of `StopBits` and the `Parity` mode, aswell as a `Uart` function.
+MicroZig defines a UART interface in [`src/core/uart.zig`](https://github.com/ZigEmbeddedGroup/microzig/blob/main/src/core/uart.zig). To use it for our chip we must define a `uart` struct that specifies the supported `DataBits` (bits send between the start and stop bit), the number of `StopBits` and the `Parity` mode, as well as a `Uart` function.
 
 ```zig
 // src/modules/chips/atsame51j20a/atsame51j20a.zig
@@ -43,7 +43,7 @@ pub const uart = struct {
 };
 ```
 
-The `Uart` function returns a anonymous struct containing a initialization function
+The `Uart` function returns an anonymous struct containing an initialization function
 `init` and four other functions for sending and receiving data via UART.
 
 * `canWrite` - Checks if the DATA register is empty and ready to be written.
@@ -98,13 +98,13 @@ pub fn Uart(comptime index: usize, comptime pins: micro.uart.Pins) type {
 ```
 
 The onboard debugger of the Curiosity Nano includes a virtual COM port interface
-ovar UART, using `PB16` (TX) and `PB17` (RX). By looking at the data sheet on
+over UART, using `PB16` (TX) and `PB17` (RX). By looking at the datasheet on
 page 34 (I/O Multiplexing and Considerations) we see that both pins are connected
-to `SERCOM5` (peripheral function C). For now, lets only support UART on SERCOM5.
+to `SERCOM5` (peripheral function C). For now, let's only support UART on SERCOM5.
 
 ![I/O Multiplexing](/iomux.png)
 
-The functions `canWrite`, `tx`, `canRead` and `rx` should be pretty self explainatory
+The functions `canWrite`, `tx`, `canRead` and `rx` should be pretty self-explanatory
 but `init` is a little bit more complex.
 
 ## Clock distribution
@@ -137,7 +137,7 @@ pub fn gclk2Init() void {
 After setting up GCLK2, we feed its Generic Clock into Peripheral Channel 35
 (SERCOM5 Core) which is connected to SERCOM5. The SERCOM5 interface is clocked
 by CLK\_SERCOM5\_APB, so we need to set `SERCOM5_` in the `APBDMASK` register to 
-`1`, otherwise the interface registers can't be read or written.
+`1`, otherwise, the interface registers can't be read or written.
 
 ![Setup clock for SERCOM5](/gclk2sercom5.png)
 
@@ -237,7 +237,7 @@ pub fn init(config: micro.uart.Config) !Self {
 }
 ```
 
-The baud-rate generator generates internal clocks for a asynchronous and synchronous
+The baud-rate generator generates internal clocks for asynchronous and synchronous
 communication. The output frequency (fBAUD) is determined by the Baud register 
 (BAUD) setting and the baud reference frequency (fref). The baud reference clock 
 is the serial engine clock, and it can be internal or external (data sheet p. 830).
@@ -264,9 +264,9 @@ and that's it.
 
 ## Serial Communication
 
-To setup UART over SERCOM5 within our `main` function we call `Uart` passing
-it `5` as the index and then call the `init` function on it. As options we select
-a baud rate of 115200, one stop bit, no parity bit and eight data bits.
+To set up UART over SERCOM5 within our `main` function we call `Uart` passing
+it `5` as the index and then call the `init` function on it. As options, we select
+a baud rate of 115200, one stop bit, no parity bit, and eight data bits.
 
 By calling the `writer` function on `uart` we get a `std.io.Writer` we can
 use as usual.
@@ -342,3 +342,47 @@ is exactly 0x20. Otherwise you won't be able to configure `PB16` and `PB17`
 correctly (that gave me some headaches).
 
 * When a terminal connects on the host, it must assert the DTR signal.
+
+## Build
+
+If you've installed [edbg](https://github.com/ataradov/edbg) you can use the
+following build file to program the Curiosity Nano using the `zig build edbg` command.
+
+```zig
+const std = @import("std");
+const microzig = @import("libs/microzig/src/main.zig");
+
+pub fn build(b: *std.build.Builder) void {
+    const backing = .{
+        .chip = microzig.chips.atsame51j20a,
+    };
+
+    var exe = microzig.addEmbeddedExecutable(b, "zig-ctap", "src/main.zig", backing, .{
+        // optional slice of packages that can be imported into your app:b
+        // .packages = &my_packages,
+    });
+
+    exe.setBuildMode(.ReleaseSmall);
+    exe.inner.strip = true;
+    exe.install();
+
+    // ########################################################################
+    // Use `zig build edbg` to:
+    //   1. build the raw binary
+    //   2. program the device using edbg (Microchip SAM)
+    // ########################################################################
+
+    const bin = exe.installRaw("firmware.bin", .{});
+
+    const edbg = b.addSystemCommand(&[_][]const u8{
+        "sudo", "edbg", "-b", "-t", "same51", "-pv", "-f", "zig-out/bin/firmware.bin",
+    });
+    edbg.step.dependOn(&bin.step);
+
+    const program_step = b.step("edbg", "Program the chip using edbg");
+    program_step.dependOn(&edbg.step);
+}
+```
+
+> __Note:__ The `build` function uses some wrapper functions from the MicroZig
+> pull request [#77](https://github.com/ZigEmbeddedGroup/microzig/pull/77).
