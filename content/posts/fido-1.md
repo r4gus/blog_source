@@ -1,9 +1,16 @@
----
-title: "FIDO2 - Passwortlose Authentifizierung"
-date: 2022-12-12T10:42:53+01:00
-math: true
-draft: true
----
++++
+title = "FIDO2 - Passwortlose Authentifizierung"
+date = 2022-12-12T10:42:53+01:00
+math = true
+author = "David P. Sugar"
+cover = ""
+tags = ["fido2", "fido", "ctap", "ctap2", "webauthn"]
+keywords = ["fido2", "fido", "ctap", "ctap2", "webauthn"]
+description = "Kurze Beschreibung des FIDO2 Protokolls"
+showFullContent = false
+readingTime = false
+hideComments = false
++++
 
 Die [fido Alliance](https://fidoalliance.org/fido2/) möchte mit dem FIDO2 Standard nicht weniger, als die Art, wie wir uns in unserem digitalen Alltag authentifizieren, zu revolutionieren. Versprochen wird eine einfach zu handhabende Lösung, die Passwörter, auf lange Sicht, vollkommen ablöst und dabei deutlich sicherer ist als herkömmliche Authentifizierungslösungen. An den meisten Leuten, die nicht den neuesten Tech-Trends folgen, dürft FIDO2 jedoch bisher unbemerkt vorbeigezogen sein. Wenn überhaupt, ist der Begriff [YubiKey](https://www.yubico.com/products/yubikey-5-overview/) bekannt, bei welchem es sich wohl um den geläufigsten FIDO2 Authenticator handelt.
 
