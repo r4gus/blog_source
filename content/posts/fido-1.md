@@ -1,11 +1,13 @@
 ---
-title: "FIDO2 - Die passwortlose Zukunft"
+title: "FIDO2 - Passwortlose Authentifizierung"
 date: 2022-12-12T10:42:53+01:00
 math: true
 draft: true
 ---
 
 Die [fido Alliance](https://fidoalliance.org/fido2/) möchte mit dem FIDO2 Standard nicht weniger, als die Art, wie wir uns in unserem digitalen Alltag authentifizieren, zu revolutionieren. Versprochen wird eine einfach zu handhabende Lösung, die Passwörter, auf lange Sicht, vollkommen ablöst und dabei deutlich sicherer ist als herkömmliche Authentifizierungslösungen. An den meisten Leuten, die nicht den neuesten Tech-Trends folgen, dürft FIDO2 jedoch bisher unbemerkt vorbeigezogen sein. Wenn überhaupt, ist der Begriff [YubiKey](https://www.yubico.com/products/yubikey-5-overview/) bekannt, bei welchem es sich wohl um den geläufigsten FIDO2 Authenticator handelt.
+
+![Roaming Authenticator](/roaming.png)
 
 In diesem Beitrag wollen wir FIDO2 etwas näher betrachten und den Unterschied zu klassischer Authentifizierung, mittels Passwort, aufzeigen.
 
@@ -27,17 +29,17 @@ Ein weiteres großes Risiko sind sogenannte Datenpannen, bei denen Angreifer une
 
 ## FIDO2 Basics
 
-FIDO2 geht einen anderen Weg, indem statt einem Geheimnis sogenannte digitale Signaturen zum Einsatz kommen. Um zu verstehen warum FIDO2 sicher ist, müssen wir uns aber erst mit etwas Mathematik und der Definition von Kryptosystemen beschäftigen.
+FIDO2 geht einen anderen Weg, indem statt einem Geheimnis sogenannte digitale Signaturen zum Einsatz kommen. Um zu verstehen was das bedeutet, müssen wir uns aber erst mit etwas Mathematik und der Definition von Kryptosystemen beschäftigen.
 
 ### Kryptosysteme
 
 Kryptosysteme sind definiert als Fünf-Tupel `(P, C, K, enc, dec)` und können dazu verwendet werden um Daten zu ver- und entschlüsseln.
 
-* `P` ist der Plaintext-Space. Hierbei handelt es sich um die Menge aller möglichen Klartexte, die verschlüsselt werden können.
-* `C` ist der Ciphertext-Space. Hierbei handelt es sich um die Menge aller möglichen Ciphertexte, die aus der Verschlüsselung des jeweils zugehörigen Klartexts resultieren.
-* `K` ist der Schlüsselraum. Hierbei handelt es sich um die Menge aller möglichen Schlüssel, mit ver- bzw. entschlüsselt werden kann. Jeder Schlüssel definiert in Kombination `enc` bzw. `dec` eine eindeutige Relation zwischen Klartext- und Ciphertextraum, d.h. für ein festes `k e K` bildet ein `x e P` genau auf ein zugehöriges `y e C` ab und umgekehrt.
-* `enc: P x K -> C` bildet von einem Schlüssel und einem Klartext auf einen Ciphertext ab.
-* `dec: C x K -> P` bildet von einem Schlüssel und einem Ciphertext auf einen Klartext ab.
+* $P$ ist der Plaintext-Space. Hierbei handelt es sich um die Menge aller möglichen Klartexte, die verschlüsselt werden können.
+* $C$ ist der Ciphertext-Space. Hierbei handelt es sich um die Menge aller möglichen Ciphertexte, die aus der Verschlüsselung des jeweils zugehörigen Klartexts resultieren.
+* $K$ ist der Schlüsselraum. Hierbei handelt es sich um die Menge aller möglichen Schlüssel, mit ver- bzw. entschlüsselt werden kann. Jeder Schlüssel definiert in Kombination `enc` bzw. `dec` eine eindeutige Relation zwischen Klartext- und Ciphertextraum, d.h. für ein festes $k \in K$ bildet ein $x \in P$ genau auf ein zugehöriges $y \in C$ ab und umgekehrt.
+* $enc: P \times K \rightarrow C$ bildet von einem Schlüssel und einem Klartext auf einen Ciphertext ab.
+* $dec: C \times K \rightarrow P$ bildet von einem Schlüssel und einem Ciphertext auf einen Klartext ab.
 
 Zu jedem Verschlüsselungsschlüssel $k_e \in K$ gibt es einen zugehörigen Entschlüsselungsschlüssel $k_d \in K$, sodass $x = dec(enc(x, k_e), k_d)$ für $x \in P$. Das bedeutet `dec` ist die inverse Operation für `enc`. Wenn mit $k_e$ verschlüsselt wurde kann nur der zugehörige $k_d$ verwendet werden, um den verschlüsselten Text wieder zu entschlüsseln.
 
@@ -80,7 +82,7 @@ Wird eine Nachricht mit dem privaten Schlüssel verschlüsselt, so spricht man v
 
 Dies kann man sich so überlegen: Nur Alice kennt den privaten Schlüssel $k_e$ und eine Nachricht die mit $k_e$ verschlüsselt wurde, kann nur mit dem zugehörigen $k_d$ entschlüsselt werden. Das bedeutet, wenn Bob die Nachricht erfolgreich entschlüsseln kann, kann er sich sicher sein, dass die Nachricht von Alice stammt. Weiterhin ist eine Anforderung an Kryptosysteme, über die noch nicht gesprochen wurde, dass selbst kleinste Änderungen am Text, beim ver-/ entschlüsseln zu völlig anderen Ausgaben führen. Damit ist es nicht ohne weiters möglich, den Text unbemerkt zu manipulieren.
 
-Genau dieses Konzept, von digitalen Signaturen, macht sich FIDO2 für die Authentifizierung zu nutze, wobei nicht nur RSA sondern auch andere asymmetrische Kryptosysteme, wie z.B. auch ECDSA ([ES256](https://www.iana.org/assignments/cose/cose.xhtml)), zum Einsatz kommen.
+Genau dieses Konzept, von digitalen Signaturen, macht sich FIDO2 für die Authentifizierung zu nutze, wobei nicht nur RSA sondern auch andere asymmetrische Kryptosysteme, wie z.B. ECDSA ([ES256](https://www.iana.org/assignments/cose/cose.xhtml)), zum Einsatz kommen.
 
 ### Protokolle
 
@@ -94,11 +96,38 @@ Die zwei wichtigsten Funktionen von WebAuthn und CTAP2 sind das Erstellen neuer 
 
 Bei der Registrierung wählt der Nutzer im Regelfall einen Nutzernamen bzw. gibt seine E-Mail Adresse an. Die Relying Party sendet dann Informationen über sich, den Nutzer, eine Challenge (zufällig generierte Zahl) und eine Liste unterstützter [Cipher Suits](https://en.wikipedia.org/wiki/Cipher_suite) an den Client, welcher einen Teil der Daten [hashed](https://en.wikipedia.org/wiki/Hash_function) (clientDataHash) und alles an den Authenticator weiterleitet.
 
-Der Authenticator wählt dann eine der gegebenen Cipher Suits aus und generiert ein neues Schlüsselpaar (Credential), welches an den Nutzer und die Relying Party (rpId: normalerweise die Basis-URL wie z.B. https://fidoalliance.org/) gebunden wird.
+Der Authenticator wählt dann eine der gegebenen Cipher Suits aus und generiert ein neues Schlüsselpaar (Credential), welches an den Nutzer und die Relying Party (rpId: normalerweise die Basis-URL wie z.B. https://fidoalliance.org/) gebunden wird. Dies geschieht jedoch erst, nachdem der Nutzer noch einmal physisch (z.B. durch Knopfdruck) bestätigt hat, dass er die Operation auch durchführen möchte, was als User Presence (up) bezeichnet wird.
 
-Schlussendlich wird der öffentliche Schlüssel, über den Client, an die Relying Party geschickt, welche diesen speichert.
+Schlussendlich wird der öffentliche Schlüssel, über den Client, an die Relying Party geschickt, welche diesen speichert. Der private Schlüssel verbleibt geschützt auf dem Authenticator.
 
 > Wichtig: Viele Details wurden in dieser knappen Zusammenfassung unterschlagen. Darunter fällt z.B. wie der öffentliche Schlüssel sicher übermittelt werden kann, da ohne Schutzvorkehrungen ein Man-in-the-Middle Angriff möglich ist.
 
 #### Authentifizierung
 
+Wenn sich ein Nutzer authentifizieren möchte (z.B. beim Login) schickt die Relying Party ihre ID, eine Challenge und weitere Daten an den Client. Dieser leitet die ID und einen Hash der Daten (`clientDataHash`) an den Authenticator weiter.
+
+Der Authenticator überprüft, nachdem die User Presence festgestellt wurde, ob ein passender privater Schlüssel auf dem Authenticator hinterlegt ist und signiert mit diesem den `clientDataHash`. Die Signatur wird danach zurück an die Relying Party gesendet, welche die Signatur überprüft. Sollte die Signatur korrekt sein, so hat sich der Nutzer erfolgreich authentifiziert.
+
+![Authentifizierung](/fido2-overfiew.png)
+
+> Wichtig: Auch hier werden viele Details unterschlagen.
+
+## Vorteile von FIDO2
+
+FIDO2 ist nicht perfekt, bietet aber einige Vorteile gegenüber Passwörter, sowie klassischen Zwei-Faktor-Authentifizierungsmethoden.
+
+1. Unter der Voraussetzung, dass der öffentliche Schlüssel $k_d$, während des Registrierungsprozesses, erfolgreich und sicher an die Relying Party übermittelt wurde, ist eine Man-in-the-Middle Angriff aussichtslos, solange der $k_e$ geheim bleibt.
+2. Außerdem sollten Phishing-Seiten schnell auffallen, da jeder Credential an die jeweilige URL der Relying Party gebunden ist.
+3. Weiterhin haben Datenpannen kein Auswirkung auf die Sicherheit der Authentifizierung, da ein Angreifer mit dem $k_d$ höchstens geheime Nachrichten an den Authenticator schicken kann.
+4. Digitale Signaturen sind, solange richtig implementiert, sicher.
+
+## Nachteile von FIDO2
+
+1. Ein großer nachteil ist, dass es bisher keine bequeme Möglichkeit gibt seinen Authenticator auf allen verwendeten Webseiten zu sperren, sollte dieser z.B. verloren gehen.
+2. Außerdem ist es nicht zwingen notwendig eine PIN zu vergeben, d.h. sollte eine unberechtigte Person Zugang zu einem Authenticator erhalten, so kann sich diese ungehindert bei jeder RP anmelden, bei der der gegebene Authenticator registriert ist.
+
+## Zusammenfassung
+
+FIDO2 ist nicht das Allerheilmittel, jedoch hat FIDO2 das Potenzial die Angriffsfläche von Unternehmen und Privatpersonen deutlich zu verkleinern. Es bleibt abzuwarten, wann der Standard endlich in den Mainstream vordringt.
+
+Ich hoffe diese kurze Zusammenfassung war hilfreich. Bei Fragen und Anregungen erreicht man mich unter david(at)thesugar.de. Grundsätzlich plane ich aus diesem Beitrag eine Serie zu machen und verschiedene Aspekte von FIDO2 näher zu beleuchten. Bis es soweit ist... Happy Hacking.
