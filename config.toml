@@ -5,7 +5,7 @@ paginate = 5
 
 [params]
   author = "David P. Sugar"
-  description = "hic Rhodus, hic salta"
+  description = "Tech blog with an focus on programming and cyber security"
   avatar = "/me.jpg"
   favicon = "/favicon.ico"
 
